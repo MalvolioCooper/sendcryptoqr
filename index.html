@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Crypto QR Code Generator | Create Wallet QR Codes Instantly</title>
+<meta content="Generate a crypto wallet QR code instantly. Fast, free, and shareable." name="description"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet"/>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0a0b0f;
+  --card: #1a1d26;
+  --border: #2a2d3a;
+  --text: #e2e4e9;
+  --text-dim: #9ca3af;
+  --primary: #6366f1;
+  --primary-glow: rgba(99, 102, 241, 0.2);
+  --success: #10b981;
+  --error: #ef4444;
+  --gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --glow: 0 0 20px rgba(99, 102, 241, 0.3);
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  line-height: 1.6;
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 40% 80%, rgba(120, 198, 121, 0.15) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  position: relative;
+  z-index: 1;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 700;
+  background: var(--gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 1rem;
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  font-size: 1.2rem;
+  color: var(--text-dim);
+  max-width: 600px;
+  margin: 0 auto 2rem;
+}
+
+.main-card {
+  background: var(--card);
+  border-radius: 24px;
+  border: 1px solid var(--border);
+  backdrop-filter: blur(20px);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  position: relative;
+}
+
+.main-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--primary), transparent);
+}
+
+.card-content {
+  padding: 2.5rem;
+}
+
+.form-group {
+  margin-bottom: 2rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+  color: var(--text);
+  font-size: 0.95rem;
+}
+
+.custom-select {
+  position: relative;
+}
+
+.select-trigger {
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid var(--border);
+  border-radius: 16px;
+  padding: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.select-trigger:hover {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 1px var(--primary-glow);
+}
+
+.select-content {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.crypto-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+}
+
+.select-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--card);
+  border: 2px solid var(--border);
+  border-radius: 16px;
+  margin-top: 0.5rem;
+  max-height: 300px;
+  overflow-y: auto;
+  z-index: 100;
+  opacity: 0;
+  transform: translateY(-10px) scale(0.95);
+  visibility: hidden;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(20px);
+}
+
+.select-dropdown.open {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  visibility: visible;
+}
+
+.select-option {
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.select-option:hover {
+  background: rgba(99, 102, 241, 0.1);
+}
+
+.select-option.selected {
+  background: var(--primary-glow);
+  font-weight: 600;
+}
+
+.address-input {
+  width: 100%;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid var(--border);
+  border-radius: 16px;
+  color: var(--text);
+  font-size: 1rem;
+  font-family: 'Monaco', monospace;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.address-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 1px var(--primary-glow);
+}
+
+.address-input::placeholder {
+  color: var(--text-dim);
+}
+
+.generate-btn {
+  width: 100%;
+  padding: 1rem 2rem;
+  background: var(--gradient);
+  border: none;
+  border-radius: 16px;
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.generate-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.generate-btn:hover::before {
+  left: 100%;
+}
+
+.generate-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--glow);
+}
+
+.qr-display {
+  margin-top: 2rem;
+  text-align: center;
+}
+
+.qr-container {
+  background: white;
+  border-radius: 20px;
+  padding: 1.5rem;
+  display: inline-block;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+.qr-container:hover {
+  transform: scale(1.02);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+}
+
+.qr-image {
+  width: 280px;
+  height: 280px;
+  border-radius: 12px;
+}
+
+.wallet-info {
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+  background: rgba(99, 102, 241, 0.1);
+  border-radius: 16px;
+  border-left: 4px solid var(--primary);
+}
+
+.wallet-address {
+  font-family: 'Monaco', monospace;
+  font-size: 0.9rem;
+  word-break: break-all;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 1rem;
+  border-radius: 12px;
+  margin-top: 0.5rem;
+}
+
+.error-message {
+  color: var(--error);
+  background: rgba(239, 68, 68, 0.1);
+  padding: 1rem;
+  border-radius: 12px;
+  border-left: 4px solid var(--error);
+  margin: 1rem 0;
+  display: none;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-top: 3rem;
+}
+
+.info-card {
+  background: var(--card);
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  padding: 2rem;
+  backdrop-filter: blur(20px);
+}
+
+.info-card h3 {
+  color: var(--primary);
+  margin-bottom: 1rem;
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+.crypto-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.crypto-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.crypto-item:hover {
+  transform: translateY(-5px);
+  background: var(--primary-glow);
+}
+
+.crypto-item img {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+}
+
+.crypto-item span {
+  font-size: 0.75rem;
+  text-align: center;
+  color: var(--text-dim);
+}
+
+.security-badge {
+  text-align: center;
+  padding: 2rem;
+  background: linear-gradient(135deg, var(--success), #047857);
+  border-radius: 20px;
+  margin: 3rem 0;
+  color: white;
+}
+
+@media (max-width: 768px) {
+  .container { padding: 1rem; }
+  .card-content { padding: 1.5rem; }
+  .qr-image { width: 240px; height: 240px; }
+  .info-grid { grid-template-columns: 1fr; gap: 1.5rem; }
+}
+
+.fade-in {
+  animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+footer a:hover {
+  color: var(--primary);
+  border-color: var(--primary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+}
+
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--border); }
+::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+</style>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <h1 class="title">Crypto QR Generator</h1>
+      <p class="subtitle">Generate beautiful QR codes for any text or cryptocurrency wallet address instantly. Fast, secure, and completely free.</p>
+    </header>
+
+    <main class="main-card fade-in">
+      <div class="card-content">
+        <form id="cryptoForm">
+          <div class="form-group">
+            <label>Supports All Networks</label>
+            <div class="crypto-grid" id="cryptoGrid">
+              <!-- Will be populated by JavaScript -->
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Wallet Address or Text</label>
+            <input 
+              type="text" 
+              id="address" 
+              name="address" 
+              class="address-input" 
+              placeholder="Enter any wallet address or text to generate QR code..."
+              autocomplete="off"
+              spellcheck="false"
+            >
+          </div>
+
+          <button type="submit" class="generate-btn" id="generateBtn">
+            Generate QR Code
+          </button>
+        </form>
+
+        <div class="error-message" id="errorMessage"></div>
+
+        <div class="qr-display">
+          <div class="qr-container">
+            <img id="qrImage" src="qr-placeholder.png" alt="QR Code" class="qr-image">
+          </div>
+          <div class="wallet-info" id="walletInfo" style="display: none;">
+            <div style="color: var(--primary); font-weight: 600; margin-bottom: 0.5rem;">Generated QR Code For:</div>
+            <div class="wallet-address" id="walletAddress"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <div class="security-badge">
+      <div style="font-size: 2rem; margin-bottom: 1rem;">🔒</div>
+      <h3 style="margin-bottom: 0.5rem;">100% Secure & Private</h3>
+      <p>All processing happens locally in your browser. Your wallet address never leaves your device.</p>
+    </div>
+
+    <div class="info-grid">
+      <div class="info-card">
+        <h3>How It Works</h3>
+        <ol style="padding-left: 1.5rem; color: var(--text-dim);">
+          <li style="margin-bottom: 0.5rem;">Enter any wallet address or text</li>
+          <li style="margin-bottom: 0.5rem;">Click "Generate QR Code"</li>
+          <li>Save, print, or share your QR code</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <footer style="margin-top: 4rem; padding: 2rem 0; border-top: 1px solid var(--border); text-align: center;">
+    <div style="max-width: 600px; margin: 0 auto; display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap;">
+      <a href="https://www.qrcryptogenerator.com/" target="_blank" rel="noopener noreferrer" style="color: var(--text-dim); text-decoration: none; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.3s ease; border: 1px solid var(--border);">
+        QR Crypto Generator
+      </a>
+      <a href="https://www.qrforcrypto.com/" target="_blank" rel="noopener noreferrer" style="color: var(--text-dim); text-decoration: none; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.3s ease; border: 1px solid var(--border);">
+        QR For Crypto
+      </a>
+      <a href="https://www.qrsender.com/" target="_blank" rel="noopener noreferrer" style="color: var(--text-dim); text-decoration: none; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.3s ease; border: 1px solid var(--border);">
+        QR Sender
+      </a>
+    </div>
+  </footer>
+
+  <script>
+    const cryptoData = [
+      { name: 'Bitcoin', value: 'bitcoin', icon: 'https://assets.coingecko.com/coins/images/1/small/bitcoin.png', networkImage: 'bitcoin.png' },
+      { name: 'Ethereum', value: 'ethereum', icon: 'https://assets.coingecko.com/coins/images/279/small/ethereum.png', networkImage: 'ethereum.png' },
+      { name: 'Solana', value: 'solana', icon: 'https://assets.coingecko.com/coins/images/4128/small/solana.png', networkImage: 'solana.png' },
+      { name: 'Cardano', value: 'cardano', icon: 'https://assets.coingecko.com/coins/images/975/small/cardano.png', networkImage: 'cardano.png' },
+      { name: 'Dogecoin', value: 'dogecoin', icon: 'https://assets.coingecko.com/coins/images/5/small/dogecoin.png', networkImage: 'dogecoin.png' },
+      { name: 'Polygon', value: 'polygon', icon: 'https://assets.coingecko.com/coins/images/4713/small/matic-token-icon.png', networkImage: 'polygon.png' },
+      { name: 'Litecoin', value: 'litecoin', icon: 'https://assets.coingecko.com/coins/images/2/small/litecoin.png', networkImage: 'litecoin.png' },
+      { name: 'Ripple', value: 'ripple', icon: 'https://assets.coingecko.com/coins/images/44/small/xrp-symbol-white-128.png', networkImage: 'ripplexrp.png' }
+    ];
+
+    // Separate array for detection (includes hidden networks)
+    const detectionData = [
+      ...cryptoData,
+      { name: 'Monero', value: 'monero', networkImage: 'monero.png' },
+      { name: 'Stellar', value: 'stellar', networkImage: 'stellar.png' },
+      { name: 'Tron', value: 'tron', networkImage: 'tron.png' },
+      { name: 'Polkadot', value: 'polkadot', networkImage: 'polkadot.png' },
+      { name: 'Zcash', value: 'zcash', networkImage: 'zcash.png' },
+      { name: 'Bitcoin Cash', value: 'bitcoincash', networkImage: 'bitcoincash.png' },
+      { name: 'Avalanche', value: 'avalanche', networkImage: 'avalanche.png' },
+      { name: 'Cosmos', value: 'cosmos', networkImage: 'cosmos.png' },
+      { name: 'Near Protocol', value: 'near', networkImage: 'near.png' },
+      { name: 'Algorand', value: 'algorand', networkImage: 'algorand.png' },
+      { name: 'Tezos', value: 'tezos', networkImage: 'tezos.png' },
+      { name: 'Filecoin', value: 'filecoin', networkImage: 'filecoin.png' }
+    ];
+
+    const validationPatterns = {
+      // Most specific patterns first to avoid conflicts
+      near: /^[a-z0-9_.-]+\.near$/,
+      bitcoincash: /^((bitcoincash:)?[qpzry9x8gf2tvdw0s3jn54khce6mua7l]{42,}|[13][a-km-zA-HJ-NP-Z1-9]{25,34})$/,
+      monero: /^4[0-9AB][1-9A-HJ-NP-Za-km-z]{93}$/,
+      tezos: /^tz[123][a-zA-Z0-9]{33}$/,
+      zcash: /^z[a-zA-Z0-9]{94}|t[13][a-zA-Z0-9]{33}$/,
+      filecoin: /^f[123][a-zA-Z0-9]{38,}$/,
+      algorand: /^[A-Z2-7]{58}$/,
+      stellar: /^G[A-Z2-7]{55}$/,
+      tron: /^T[a-zA-Z0-9]{33}$/,
+      polkadot: /^1[a-km-zA-HJ-NP-Z1-9]{47}$/,
+      dogecoin: /^D{1}[5-9A-HJ-NP-U]{1}[1-9A-HJ-NP-Za-km-z]{32}$/,
+      litecoin: /^[LM3][a-km-zA-HJ-NP-Z1-9]{26,33}$/,
+      bitcoin: /^(bc1|[13])[a-zA-HJ-NP-Z0-9]{25,87}$/,
+      avalanche: /^(X-|P-|C-)[a-zA-Z0-9]{6,50}$/,
+      cosmos: /^cosmos[a-z0-9]{39}$/,
+      ethereum: /^0x[a-fA-F0-9]{40}$/,
+      polygon: /^0x[a-fA-F0-9]{40}$/,
+      cardano: /^addr1[a-z0-9]{58,}$/,
+      ripple: /^r[0-9a-zA-Z]{24,34}$/,
+      // Solana pattern - most generic Base58, checked last
+      solana: /^[1-9A-HJ-NP-Za-km-z]{43,44}$/
+    };
+
+    // Initialize UI
+    function init() {
+      populateCryptoGrid();
+      setupEventListeners();
+    }
+
+    function populateCryptoGrid() {
+      const grid = document.getElementById('cryptoGrid');
+      grid.innerHTML = cryptoData.map(crypto => `
+        <div class="crypto-item">
+          <img src="${crypto.icon}" alt="${crypto.name}">
+          <span>${crypto.name}</span>
+        </div>
+      `).join('');
+    }
+
+    function setupEventListeners() {
+      const form = document.getElementById('cryptoForm');
+      form.addEventListener('submit', handleFormSubmit);
+    }
+
+    function detectCryptoNetwork(address) {
+      // Clean the address
+      const cleanAddress = address.trim();
+      
+      // Check specific patterns first to avoid conflicts
+      const orderedPatterns = [
+        'near',        // Most specific - ends with .near
+        'monero',      // Starts with 4, 95 chars (very specific)
+        'tezos',       // Starts with tz1, tz2, tz3 (check before Zcash)
+        'zcash',       // Starts with z (shielded) or t1/t3 (transparent)
+        'filecoin',    // Starts with f1, f2, f3
+        'algorand',    // 58 chars, uppercase Base32
+        'stellar',     // Starts with G, Base32, 56 chars
+        'tron',        // Starts with T, 34 chars
+        'polkadot',    // Starts with 1, exactly 48 chars
+        'dogecoin',    // Starts with D, 34 chars
+        'litecoin',    // Starts with L, M, or 3
+        'bitcoincash', // Bitcoin Cash (legacy and CashAddr formats)
+        'bitcoin',     // Starts with bc1, 1, or 3 (after Bitcoin Cash)
+        'avalanche',   // Chain-specific prefixes X-, P-, C-
+        'cosmos',      // Specific prefix cosmos
+        'ethereum',    // Starts with 0x, 42 chars
+        'polygon',     // Also starts with 0x (same as Ethereum)
+        'cardano',     // Starts with addr1
+        'ripple',      // Starts with r
+        'solana'       // Generic Base58 (checked last)
+      ];
+      
+      // Check each pattern in order
+      for (const network of orderedPatterns) {
+        const pattern = validationPatterns[network];
+        if (pattern && pattern.test(cleanAddress)) {
+          return network;
+        }
+      }
+      
+      // If no pattern matches, return null
+      return null;
+    }
+
+    function handleFormSubmit(e) {
+      e.preventDefault();
+      
+      const address = document.getElementById('address').value.trim();
+      const errorMsg = document.getElementById('errorMessage');
+      const generateBtn = document.getElementById('generateBtn');
+
+      errorMsg.style.display = 'none';
+
+      if (!address) {
+        showError('Please enter some text or wallet address');
+        return;
+      }
+
+      generateBtn.textContent = 'Generating...';
+      generateBtn.style.opacity = '0.7';
+
+      // Detect crypto network and show appropriate image
+      setTimeout(() => {
+        const detectedNetwork = detectCryptoNetwork(address);
+        
+        if (detectedNetwork) {
+          // Show network image instead of QR code
+          showNetworkImage(address, detectedNetwork);
+        } else {
+          // Generate QR code for non-crypto addresses
+          generateQR(address);
+        }
+        
+        generateBtn.textContent = 'Generate QR Code';
+        generateBtn.style.opacity = '1';
+      }, 800);
+    }
+
+    function showNetworkImage(address, networkType) {
+      // Find the crypto data for this network (search in detectionData for hidden networks)
+      const cryptoInfo = detectionData.find(crypto => crypto.value === networkType);
+      
+      if (cryptoInfo) {
+        // Show the network-specific image
+        document.getElementById('qrImage').src = cryptoInfo.networkImage;
+        document.getElementById('walletAddress').textContent = address;
+        document.getElementById('walletInfo').style.display = 'block';
+        
+        // Update the info text to show detected network
+        const walletLabel = document.querySelector('.wallet-info div');
+        walletLabel.textContent = `Detected ${cryptoInfo.name} Address:`;
+        walletLabel.style.color = 'var(--success)';
+        
+        document.querySelector('.qr-container').classList.add('fade-in');
+      }
+    }
+
+    function generateQR(inputText) {
+      // Create a QR code for non-crypto text
+      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=${encodeURIComponent(inputText)}`;
+      
+      document.getElementById('qrImage').src = qrUrl;
+      document.getElementById('walletAddress').textContent = inputText;
+      document.getElementById('walletInfo').style.display = 'block';
+      
+      // Reset the info text for QR codes
+      const walletLabel = document.querySelector('.wallet-info div');
+      walletLabel.textContent = 'Generated QR Code For:';
+      walletLabel.style.color = 'var(--primary)';
+      
+      document.querySelector('.qr-container').classList.add('fade-in');
+    }
+
+    function showError(message) {
+      const errorMsg = document.getElementById('errorMessage');
+      errorMsg.textContent = message;
+      errorMsg.style.display = 'block';
+    }
+
+    // Initialize when DOM is ready
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
